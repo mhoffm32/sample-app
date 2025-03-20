@@ -15,6 +15,7 @@
  */
 package main
 import (
+        "fmt"
         "image"
         "image/color"
         "image/draw"
@@ -22,16 +23,28 @@ import (
         "net/http"
 )
 func main() {
+        http.HandleFunc("/", rootHandler)
         http.HandleFunc("/blue", blueHandler)
         http.HandleFunc("/red", redHandler)
+        fmt.Println("Starting server on :8080...")
         http.ListenAndServe(":8080", nil)
 }
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+        if r.URL.Path != "/" {
+                http.NotFound(w, r)
+                return
+        }
+        fmt.Fprintf(w, "Hello! Try /blue or /red endpoints. Version 2.1 fresh build.")
+}
+
 func blueHandler(w http.ResponseWriter, r *http.Request) {
         img := image.NewRGBA(image.Rect(0, 0, 100, 100))
         draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{0, 0, 255, 255}}, image.ZP, draw.Src)
         w.Header().Set("Content-Type", "image/png")
         png.Encode(w, img)
 }
+
 func redHandler(w http.ResponseWriter, r *http.Request) {
         img := image.NewRGBA(image.Rect(0, 0, 100, 100))
         draw.Draw(img, img.Bounds(), &image.Uniform{color.RGBA{255, 0, 0, 255}}, image.ZP, draw.Src)
